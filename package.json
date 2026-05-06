@@ -1,0 +1,10 @@
+{
+  "name": "campus-notifications",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "logging_middleware",
+    "notification_app_fe",
+    "notification_app_be"
+  ]
+}
