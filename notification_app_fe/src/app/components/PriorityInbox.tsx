@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Notification, getTopNNotifications } from '../../lib/utils/notifications';
+import { useNotificationContext } from '../../lib/contexts/NotificationContext';
 
 const MOCK_NOTIFICATIONS: Notification[] = [
   { "ID": "d146095a", "Type": "Result", "Message": "mid-sem", "Timestamp": "2026-04-22 17:51:30" },
@@ -22,6 +23,7 @@ export default function PriorityInbox() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { readStatus, markAsRead } = useNotificationContext();
 
   useEffect(() => {
     const fetchNotifications = async () => {
@@ -76,8 +78,15 @@ export default function PriorityInbox() {
       {error && <div className="error-message">{error}</div>}
       
       <div className="notification-list">
-        {topNotifications.map((notif, index) => (
-          <div key={notif.ID} className={`notification-item type-${notif.Type.toLowerCase()}`} style={{ animationDelay: `${index * 0.05}s` }}>
+        {topNotifications.map((notif, index) => {
+          const isRead = readStatus[notif.ID];
+          return (
+            <div 
+              key={notif.ID} 
+              className={`notification-item type-${notif.Type.toLowerCase()} ${isRead ? 'read' : 'unread'}`} 
+              style={{ animationDelay: `${index * 0.05}s` }}
+              onClick={() => markAsRead(notif.ID)}
+            >
             <div className="notification-icon">
               {notif.Type === 'Placement' && '💼'}
               {notif.Type === 'Result' && '📊'}
@@ -90,8 +99,9 @@ export default function PriorityInbox() {
               </div>
               <p className="message">{notif.Message}</p>
             </div>
-          </div>
-        ))}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
