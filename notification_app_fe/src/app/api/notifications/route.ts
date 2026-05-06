@@ -1,12 +1,27 @@
 import { NextResponse } from 'next/server';
 import { Log } from 'logging_middleware';
 
-export async function GET() {
+export async function GET(request: Request) {
   Log('backend', 'info', 'route', 'Attempting to fetch notifications from evaluation service');
   
   try {
     const token = process.env.NEXT_PUBLIC_LOG_TOKEN || 'placeholder-token';
-    const response = await fetch('http://20.207.122.201/evaluation-service/notifications', {
+    const { searchParams } = new URL(request.url);
+    const limit = searchParams.get('limit');
+    const page = searchParams.get('page');
+    const notification_type = searchParams.get('notification_type');
+
+    let fetchUrl = 'http://20.207.122.201/evaluation-service/notifications';
+    const queryParts = [];
+    if (limit) queryParts.push(`limit=${limit}`);
+    if (page) queryParts.push(`page=${page}`);
+    if (notification_type) queryParts.push(`notification_type=${notification_type}`);
+    
+    if (queryParts.length > 0) {
+      fetchUrl += `?${queryParts.join('&')}`;
+    }
+
+    const response = await fetch(fetchUrl, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
